@@ -30,12 +30,14 @@ def test_strategy_harvest(vault, gov, strategy, token, common_health_check, chai
     chain.snapshot()
     # Small gain doesn't trigger
     balance = strategy.estimatedTotalAssets()
-    token.transfer(strategy, balance * 0.02)
+    token.transfer(strategy, balance * 0.01 - 1)
+    chain.sleep(1)
     strategy.harvest()
     chain.revert()
 
     # gain is too big
     balance = strategy.estimatedTotalAssets()
+    chain.sleep(1)
     token.transfer(strategy, balance * 0.05)
 
     with brownie.reverts():
@@ -48,15 +50,15 @@ def test_strategy_harvest(vault, gov, strategy, token, common_health_check, chai
 
     # small loss doesn't trigger
     balance = strategy.estimatedTotalAssets()
-    strategy._takeFunds(balance * 0.01)
+    strategy._takeFunds(balance * 0.0001 -1)
     strategy.harvest()
 
     chain.revert()
 
     # loss is too important
     balance = strategy.estimatedTotalAssets()
-    strategy._takeFunds(balance * 0.03)
-
+    strategy._takeFunds(balance * 0.01)
+    chain.sleep(1)
     with brownie.reverts():
         strategy.harvest()
 
@@ -77,6 +79,7 @@ def test_strategy_harvest_custom_limits(
     chain.snapshot()
 
     balance = strategy.estimatedTotalAssets()
+    chain.sleep(1)
     token.transfer(strategy, balance * 0.5)
     strategy.harvest()
 
